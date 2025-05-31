@@ -1,3 +1,4 @@
+import { QuizSettingsFormState } from '@quizer/config/quiz-settings';
 import { generateSingleQuizPrompt } from '@quizer/lib/generateQuizPrompt';
 import { parseCompletion } from '@quizer/lib/parseCompetion';
 import { NextRequest, NextResponse } from 'next/server';
@@ -9,12 +10,10 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
   try {
-    const { topic = 'Basic English', level = 'beginner' } = await req.json();
+    const args: QuizSettingsFormState = await req.json();
 
     const prompt = generateSingleQuizPrompt({
-      topic,
-      amount: 5,
-      level,
+      ...args,
     });
 
     const completion = await openai.chat.completions.create({

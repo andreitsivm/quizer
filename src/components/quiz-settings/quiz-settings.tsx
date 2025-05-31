@@ -5,6 +5,8 @@ import { useFormContext } from 'react-hook-form';
 import { Button } from '@radix-ui/themes';
 import { QuizSettingsFormState } from '@quizer/config/quiz-settings';
 import { useChoiceQuizStore } from '@quizer/store/useChoiceQuizStore';
+import QuizTopic from '../quiz-topic/quiz-topic';
+import QuizAccent from '../quiz-accent/quiz-accent';
 
 const QuizSettings: React.FC = () => {
   const { handleSubmit } = useFormContext<QuizSettingsFormState>();
@@ -13,11 +15,14 @@ const QuizSettings: React.FC = () => {
 
   const onSubmit = (data: QuizSettingsFormState) => {
     generateQuizRequest(data);
+    console.log(data);
   };
 
   return (
     <form className='flex gap-4 items-center' onSubmit={handleSubmit(onSubmit)}>
       <DifficultyLevel />
+      <QuizAccent />
+      <QuizTopic />
       <Button type='submit' className='my-4 mx-auto' disabled={isLoading}>
         Generate
       </Button>

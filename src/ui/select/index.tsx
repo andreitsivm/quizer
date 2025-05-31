@@ -10,7 +10,6 @@ type RadixSelectOption = {
 const Select: React.FC<
   { options: RadixSelectOption[] } & ControllerRenderProps
 > = ({ options, ...props }) => {
-  console.log(props);
   return (
     <RadixSelect.Root {...props} onValueChange={props.onChange}>
       <RadixSelect.Trigger className='flex items-center justify-between'></RadixSelect.Trigger>

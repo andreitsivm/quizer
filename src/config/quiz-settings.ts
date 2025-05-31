@@ -4,6 +4,7 @@ export enum SettingsFormFields {
   language = 'language',
   level = 'difficulty',
   questionsQty = 'questions_qty',
+  accent = 'accent',
 }
 
 export type QuizSettingsFormState = {
@@ -13,6 +14,7 @@ export type QuizSettingsFormState = {
   [SettingsFormFields.level]: string;
   [SettingsFormFields.questionsQty]: number;
   [SettingsFormFields.topic]: string;
+  [SettingsFormFields.accent]: string;
 };
 
 export enum QuizTypes {
@@ -43,10 +45,16 @@ export const levelsOptions = [
   { value: 'C2', label: 'Proficient' },
 ];
 
+export const accentOptions = [
+  { value: 'grammar', label: 'grammar' },
+  { value: 'vocabulary', label: 'vocabulary' },
+];
+
 export const initialSettingsValues: Partial<QuizSettingsFormState> = {
-  [SettingsFormFields.topic]: 'Basic English',
+  [SettingsFormFields.topic]: 'Airport and tourism',
   [SettingsFormFields.quizType]: 'single_choice',
   [SettingsFormFields.language]: 'English',
-  [SettingsFormFields.level]: levelsOptions[0].value, // Default to Beginner
+  [SettingsFormFields.level]: levelsOptions[0].value,
   [SettingsFormFields.questionsQty]: 10,
+  [SettingsFormFields.accent]: accentOptions[0].value,
 };

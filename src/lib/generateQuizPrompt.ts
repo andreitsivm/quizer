@@ -1,23 +1,22 @@
-type SingleChoiceQuizArgs = {
-  topic: string;
-  amount: number;
-  level: 'beginner' | 'intermediate' | 'advanced';
-};
+import { QuizSettingsFormState } from '@quizer/config/quiz-settings';
 
 export const generateSingleQuizPrompt = ({
   topic,
-  amount,
-  level,
-}: SingleChoiceQuizArgs): string => {
+  questions_qty,
+  difficulty,
+  accent,
+}: QuizSettingsFormState): string => {
   const prompt = `
-      Generate ${amount} single-choice questions in English for testing language skills.
+      Generate ${questions_qty} single-choice questions in English for testing language skills.
+      If you already generate similar test, pleas create completely different output for test.
       Format:
       - Each question has a question string and 4 options: A, B, C, D
       - Only one correct answer
       - Mark correct answer with a "correct" field
 
       Topic: ${topic}
-      Difficulty: ${level}
+      Difficulty: ${difficulty}
+      Accent: ${accent}
 
       Respond in JSON format like:
       [
