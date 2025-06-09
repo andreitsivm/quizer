@@ -2,29 +2,29 @@
 import * as React from 'react';
 
 import {
-  levelsOptions,
+  learningFocusOptions,
   SettingsFormFields,
 } from '@quizer/config/quiz-settings';
 import { Controller, useFormContext } from 'react-hook-form';
 import Select from '@quizer/ui/select';
 
-const DifficultyLevel: React.FC = () => {
+const QuizLearningFocus: React.FC = () => {
   const { control } = useFormContext();
 
   return (
     <Controller
-      name={SettingsFormFields.level}
+      name={SettingsFormFields.learningFocus}
       control={control}
       rules={{
-        required: 'Please, choose difficulty level',
+        required: 'Please choose learning focus',
       }}
       render={({ field, fieldState }) => (
         <div>
           <Select
             selectTriggerProps={{
-              placeholder: 'Difficulty level',
+              placeholder: 'Learning focus',
             }}
-            options={levelsOptions}
+            options={learningFocusOptions}
             {...field}
           />
           <p>{fieldState.error?.message}</p>
@@ -34,4 +34,4 @@ const DifficultyLevel: React.FC = () => {
   );
 };
 
-export default DifficultyLevel;
+export default QuizLearningFocus;

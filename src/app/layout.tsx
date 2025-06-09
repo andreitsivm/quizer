@@ -5,10 +5,9 @@ import {
   // ThemePanel
 } from '@radix-ui/themes';
 import '@radix-ui/themes/styles.css';
-import './globals.css';
 import Header from '@quizer/components/header/header';
-import QuizSettings from '@quizer/components/quiz-settings/quiz-settings';
 import RootProvider from '@quizer/providers/root-provider';
+import './globals.css';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -39,10 +38,7 @@ export default function RootLayout({
           <RootProvider>
             <Header />
 
-            <main>
-              <QuizSettings />
-              {children}
-            </main>
+            <main>{children}</main>
           </RootProvider>
           {/* <ThemePanel /> */}
         </Theme>

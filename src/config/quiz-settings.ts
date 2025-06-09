@@ -4,7 +4,7 @@ export enum SettingsFormFields {
   language = 'language',
   level = 'difficulty',
   questionsQty = 'questions_qty',
-  accent = 'accent',
+  learningFocus = 'learningFocus',
 }
 
 export type QuizSettingsFormState = {
@@ -13,8 +13,7 @@ export type QuizSettingsFormState = {
   [SettingsFormFields.language]: string;
   [SettingsFormFields.level]: string;
   [SettingsFormFields.questionsQty]: number;
-  [SettingsFormFields.topic]: string;
-  [SettingsFormFields.accent]: string;
+  [SettingsFormFields.learningFocus]: string;
 };
 
 export enum QuizTypes {
@@ -45,16 +44,66 @@ export const levelsOptions = [
   { value: 'C2', label: 'Proficient' },
 ];
 
-export const accentOptions = [
-  { value: 'grammar', label: 'grammar' },
+export const learningFocusOptions = [
+  // Present Tenses
+  { value: 'present_simple', label: 'Present Simple' },
+  { value: 'present_continuous', label: 'Present Continuous' },
+  { value: 'present_perfect', label: 'Present Perfect' },
+  { value: 'present_perfect_continuous', label: 'Present Perfect Continuous' },
+
+  // Past Tenses
+  { value: 'past_simple', label: 'Past Simple' },
+  { value: 'past_continuous', label: 'Past Continuous' },
+  { value: 'past_perfect', label: 'Past Perfect' },
+  { value: 'past_perfect_continuous', label: 'Past Perfect Continuous' },
+
+  // Future Tenses
+  { value: 'future_simple', label: 'Future Simple' },
+  { value: 'future_continuous', label: 'Future Continuous' },
+  { value: 'future_perfect', label: 'Future Perfect' },
+  { value: 'future_perfect_continuous', label: 'Future Perfect Continuous' },
+
+  // Modal Verbs
+  { value: 'modal_verbs', label: 'Modal Verbs' },
+
+  // Conditionals
+  { value: 'zero_conditional', label: 'Zero Conditional' },
+  { value: 'first_conditional', label: 'First Conditional' },
+  { value: 'second_conditional', label: 'Second Conditional' },
+  { value: 'third_conditional', label: 'Third Conditional' },
+  { value: 'mixed_conditionals', label: 'Mixed Conditionals' },
+
+  // Passive Voice
+  { value: 'passive_voice', label: 'Passive Voice' },
+
+  // Reported Speech
+  { value: 'reported_speech', label: 'Reported Speech' },
+
+  // Questions
+  { value: 'question_forms', label: 'Question Forms' },
+
+  // Articles
+  { value: 'articles', label: 'Articles (a, an, the)' },
+
+  // Gerunds and Infinitives
+  { value: 'gerunds_infinitives', label: 'Gerunds & Infinitives' },
+
+  // Relative Clauses
+  { value: 'relative_clauses', label: 'Relative Clauses' },
+
+  // Comparatives & Superlatives
+  { value: 'comparatives_superlatives', label: 'Comparatives & Superlatives' },
+
+  // Other grammar topics
+  { value: 'prepositions', label: 'Prepositions' },
+  { value: 'conjunctions', label: 'Conjunctions' },
+  { value: 'noun_phrases', label: 'Noun Phrases' },
+  { value: 'adjective_order', label: 'Adjective Order' },
   { value: 'vocabulary', label: 'vocabulary' },
 ];
 
 export const initialSettingsValues: Partial<QuizSettingsFormState> = {
-  [SettingsFormFields.topic]: 'Airport and tourism',
   [SettingsFormFields.quizType]: 'single_choice',
   [SettingsFormFields.language]: 'English',
-  [SettingsFormFields.level]: levelsOptions[0].value,
   [SettingsFormFields.questionsQty]: 10,
-  [SettingsFormFields.accent]: accentOptions[0].value,
 };

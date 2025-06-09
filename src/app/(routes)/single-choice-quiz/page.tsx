@@ -9,7 +9,11 @@ const SingleChoiceQuiz = () => {
   const { result, isLoading } = useChoiceQuizStore();
 
   if (isLoading) {
-    return <Spinner />;
+    return (
+      <Container>
+        <Spinner />
+      </Container>
+    );
   }
 
   if (!result) {

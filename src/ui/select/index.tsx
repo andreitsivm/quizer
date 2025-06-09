@@ -8,11 +8,22 @@ type RadixSelectOption = {
 };
 
 const Select: React.FC<
-  { options: RadixSelectOption[] } & ControllerRenderProps
-> = ({ options, ...props }) => {
+  {
+    options: RadixSelectOption[];
+    selectRootProps?: RadixSelect.RootProps;
+    selectTriggerProps?: RadixSelect.TriggerProps;
+  } & ControllerRenderProps
+> = ({ options, selectRootProps, selectTriggerProps, ...props }) => {
   return (
-    <RadixSelect.Root {...props} onValueChange={props.onChange}>
-      <RadixSelect.Trigger className='flex items-center justify-between'></RadixSelect.Trigger>
+    <RadixSelect.Root
+      {...selectRootProps}
+      {...props}
+      onValueChange={props.onChange}
+    >
+      <RadixSelect.Trigger
+        className='flex items-center justify-between'
+        {...selectTriggerProps}
+      />
       <RadixSelect.Content className='text-black'>
         <RadixSelect.Group>
           {options.map(option => (

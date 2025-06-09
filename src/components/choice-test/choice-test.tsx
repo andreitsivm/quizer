@@ -9,7 +9,6 @@ export const ChoiceQuiz: React.FC<{
   const [answers, setAnswers] = useState<(string | null)[]>(
     Array(data?.length).fill(null),
   );
-  const [checked, setChecked] = useState(false);
 
   const handleChange = (index: number, value: string) => {
     const newAnswers = [...answers];
@@ -17,19 +16,15 @@ export const ChoiceQuiz: React.FC<{
     setAnswers(newAnswers);
   };
 
-  const handleCheck = () => {
-    setChecked(true);
-  };
-
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6 my-4'>
       {data.map((test, index) => (
         <div key={index}>
           <p className='mb-2 font-medium'>{test.question}</p>
           {Object.keys(test.options).map(value => {
             const isSelected = answers[index] === value;
             const isCorrect = test.correct === value;
-            const shouldShow = checked && isSelected;
+            const shouldShow = isSelected;
 
             return (
               <Flex key={value} align='start' direction='column' gap='1'>
@@ -59,13 +54,6 @@ export const ChoiceQuiz: React.FC<{
           })}
         </div>
       ))}
-
-      <button
-        onClick={handleCheck}
-        className='mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
-      >
-        Check
-      </button>
     </div>
   );
 };
