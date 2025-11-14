@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import {
   DndContext,
   DragEndEvent,
+  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
@@ -13,7 +14,7 @@ import {
 import {
   arrayMove,
   SortableContext,
-  verticalListSortingStrategy,
+  horizontalListSortingStrategy,
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -24,7 +25,6 @@ import {
   Stack,
   Chip,
   Button,
-  Alert,
 } from '@mui/material';
 import { SentenceOrderingQuestion } from '@quizer/types/quizes';
 
@@ -34,6 +34,8 @@ interface SortableWordProps {
   isDragging?: boolean;
   isCorrect?: boolean;
   isIncorrect?: boolean;
+  isOver?: boolean;
+  isDragOver?: boolean;
 }
 
 const SortableWord: React.FC<SortableWordProps> = ({
@@ -41,6 +43,8 @@ const SortableWord: React.FC<SortableWordProps> = ({
   word,
   isCorrect,
   isIncorrect,
+  isOver,
+  isDragOver,
 }) => {
   const {
     attributes,
@@ -49,12 +53,19 @@ const SortableWord: React.FC<SortableWordProps> = ({
     transform,
     transition,
     isDragging: isItemDragging,
-  } = useSortable({ id });
+  } = useSortable({ 
+    id,
+    animateLayoutChanges: () => true,
+  });
 
+  // When dragging, keep the original in place (maintains space) and let DragOverlay show the dragged item
+  // Only apply transform when NOT dragging to allow smooth reordering animations
+  const dragTransform = CSS.Transform.toString(transform);
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isItemDragging ? 0.5 : 1,
+    transform: dragTransform,
+    transition: isItemDragging ? 'none' : (transition || 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'),
+    opacity: isItemDragging ? 0.4 : 1,
+    zIndex: isItemDragging ? 1 : 1,
   };
 
   return (
@@ -67,30 +78,59 @@ const SortableWord: React.FC<SortableWordProps> = ({
         p: 2,
         borderRadius: 2,
         border: '2px solid',
-        borderColor: isCorrect
+        borderColor: isDragOver
+          ? 'primary.main'
+          : isOver
+          ? 'primary.light'
+          : isCorrect
           ? 'success.main'
           : isIncorrect
           ? 'error.main'
           : 'grey.300',
-        bgcolor: isCorrect
+        bgcolor: isDragOver
+          ? 'primary.light'
+          : isOver
+          ? 'action.hover'
+          : isCorrect
           ? 'success.light'
           : isIncorrect
           ? 'error.light'
           : 'grey.50',
-        cursor: 'grab',
-        '&:active': {
-          cursor: 'grabbing',
-        },
-        transition: 'all 0.2s',
-        '&:hover': {
+        cursor: isItemDragging ? 'grabbing' : 'grab',
+        boxShadow: isDragOver
+          ? '0 4px 12px rgba(102, 126, 234, 0.4)'
+          : 'none',
+        '&:hover': !isItemDragging ? {
           borderColor: 'primary.main',
           bgcolor: 'action.hover',
-        },
+        } : {},
+        position: 'relative',
+        // Maintain space and dimensions when dragging
+        minWidth: 'fit-content',
+        minHeight: 'fit-content',
+        // Prevent layout shift
+        flexShrink: 0,
       }}
     >
       <Typography variant='body1' fontWeight={600}>
         {word}
       </Typography>
+      {isDragOver && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            border: '2px dashed',
+            borderColor: 'primary.main',
+            borderRadius: 2,
+            bgcolor: 'rgba(102, 126, 234, 0.1)',
+            pointerEvents: 'none',
+          }}
+        />
+      )}
     </Box>
   );
 };
@@ -99,6 +139,7 @@ export const SentenceOrderingQuiz: React.FC<{
   data: SentenceOrderingQuestion[];
 }> = ({ data }) => {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
   const [wordOrders, setWordOrders] = useState<Record<number, string[]>>({});
   const [submitted, setSubmitted] = useState(false);
 
@@ -110,19 +151,11 @@ export const SentenceOrderingQuiz: React.FC<{
     }),
   );
 
-  // Initialize word orders with shuffled words
+  // Initialize word orders with AI-provided shuffled words
   React.useEffect(() => {
     const initialOrders: Record<number, string[]> = {};
     data.forEach((question, index) => {
-      // Validate that shuffled has the same words as the correct order
-      // If shuffled is missing words or has wrong count, use shuffled as-is but log warning
-      if (question.shuffled.length !== question.words.length) {
-        console.warn(
-          `Question ${index + 1}: Shuffled array length (${
-            question.shuffled.length
-          }) doesn't match words array length (${question.words.length})`,
-        );
-      }
+      // Use AI-provided shuffled array directly - no client-side shuffling or fixing
       initialOrders[index] = [...question.shuffled];
     });
     setWordOrders(initialOrders);
@@ -132,9 +165,15 @@ export const SentenceOrderingQuiz: React.FC<{
     setActiveId(event.active.id as string);
   };
 
+  const handleDragOver = (event: DragOverEvent) => {
+    const { over } = event;
+    setOverId(over ? (over.id as string) : null);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
+    setOverId(null);
 
     if (!over) return;
 
@@ -256,10 +295,6 @@ export const SentenceOrderingQuiz: React.FC<{
           const wordIds = currentOrder.map((_, i) => `q${qIndex}-word-${i}`);
           const sentenceCorrect = isSentenceCorrect(qIndex);
 
-          // Validate data integrity
-          const hasDataIssue =
-            question.shuffled.length !== question.words.length;
-
           return (
             <Paper
               key={qIndex}
@@ -287,52 +322,66 @@ export const SentenceOrderingQuiz: React.FC<{
                   >
                     Arrange the words to form a correct sentence:
                   </Typography>
-                  {hasDataIssue && (
-                    <Alert severity='warning' sx={{ mb: 2 }}>
-                      Warning: The number of words doesn&apos;t match. Please
-                      ensure all words are included.
-                    </Alert>
-                  )}
                 </Box>
 
                 <DndContext
                   sensors={sensors}
                   collisionDetection={closestCenter}
                   onDragStart={handleDragStart}
+                  onDragOver={handleDragOver}
                   onDragEnd={handleDragEnd}
                 >
                   <SortableContext
                     items={wordIds}
-                    strategy={verticalListSortingStrategy}
+                    strategy={horizontalListSortingStrategy}
                   >
                     <Stack
                       spacing={1.5}
                       direction='row'
                       flexWrap='wrap'
                       gap={1}
+                      sx={{
+                        minHeight: '60px',
+                        alignItems: 'center',
+                        position: 'relative',
+                        // Ensure proper layout during drag - prevent overlapping
+                        '& > *': {
+                          flexShrink: 0,
+                        },
+                      }}
                     >
                       {currentOrder.map((word, wordIndex) => {
+                        const wordId = `q${qIndex}-word-${wordIndex}`;
                         const correct = isWordCorrect(qIndex, wordIndex);
                         const incorrect =
                           submitted &&
                           !sentenceCorrect &&
                           !correct &&
                           wordIndex < question.words.length;
+                        const isDragOver = !!(activeId && overId === wordId && activeId !== wordId);
+                        const isOver = !!(activeId && activeId !== wordId && overId === wordId);
 
                         return (
                           <SortableWord
-                            key={`q${qIndex}-word-${wordIndex}`}
-                            id={`q${qIndex}-word-${wordIndex}`}
+                            key={wordId}
+                            id={wordId}
                             word={word}
                             isCorrect={correct}
                             isIncorrect={incorrect}
+                            isDragOver={isDragOver}
+                            isOver={isOver}
                           />
                         );
                       })}
                     </Stack>
                   </SortableContext>
 
-                  <DragOverlay>
+                  <DragOverlay
+                    dropAnimation={{
+                      duration: 300,
+                      easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
+                  >
                     {activeId ? (
                       <Box
                         sx={{
@@ -341,6 +390,9 @@ export const SentenceOrderingQuiz: React.FC<{
                           border: '2px solid',
                           borderColor: 'primary.main',
                           bgcolor: 'primary.light',
+                          boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
+                          transform: 'rotate(2deg) scale(1.05)',
+                          transition: 'all 0.2s',
                         }}
                       >
                         <Typography variant='body1' fontWeight={600}>

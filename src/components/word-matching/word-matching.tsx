@@ -114,22 +114,6 @@ const DraggableDroppableItem: React.FC<DraggableDroppableItemProps> = ({
   );
 };
 
-// Helper function to shuffle array and return shuffled array with original indices
-const shuffleWithIndices = <T,>(
-  array: T[],
-): Array<{ value: T; originalIndex: number }> => {
-  const indexed = array.map((value, index) => ({
-    value,
-    originalIndex: index,
-  }));
-  // Fisher-Yates shuffle
-  for (let i = indexed.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
-  }
-  return indexed;
-};
-
 export const WordMatchingQuiz: React.FC<{ data: WordMatchingQuestion[] }> = ({
   data,
 }) => {
@@ -139,27 +123,78 @@ export const WordMatchingQuiz: React.FC<{ data: WordMatchingQuestion[] }> = ({
   >({});
   const [submitted, setSubmitted] = useState(false);
 
-  // Shuffle words and translations for display, maintaining original indices
-  type ShuffledItem = { value: string; originalIndex: number };
-  type ShuffledData = Record<
+  // Use AI-provided shuffled data directly - no client-side shuffling
+  // The AI returns words and translations already shuffled
+  // We need to map them to their original indices for validation
+  type DisplayItem = { value: string; originalIndex: number };
+  type DisplayData = Record<
     number,
     {
-      english: ShuffledItem[];
-      translations: ShuffledItem[];
+      english: DisplayItem[];
+      translations: DisplayItem[];
     }
   >;
-  const [shuffledData, setShuffledData] = useState<ShuffledData>({});
 
-  // Initialize shuffled data on mount
+  const [displayData, setDisplayData] = useState<DisplayData>({});
+
+  // Initialize display data from AI-provided shuffled arrays
   useEffect(() => {
-    const shuffled: typeof shuffledData = {};
+    const display: DisplayData = {};
     data.forEach((question, index) => {
-      shuffled[index] = {
-        english: shuffleWithIndices(question.words),
-        translations: shuffleWithIndices(question.translations),
+      // AI provides words and translations already shuffled
+      // Map them to original indices based on the pairs array
+      const englishMap = new Map<string, number[]>();
+      const translationMap = new Map<string, number[]>();
+
+      question.pairs.forEach((pair, pairIndex) => {
+        if (!englishMap.has(pair.english)) {
+          englishMap.set(pair.english, []);
+        }
+        englishMap.get(pair.english)!.push(pairIndex);
+
+        if (!translationMap.has(pair.translation)) {
+          translationMap.set(pair.translation, []);
+        }
+        translationMap.get(pair.translation)!.push(pairIndex);
+      });
+
+      // Create display items with original indices
+      // Track which indices have been used for duplicates
+      const englishUsedIndices = new Set<number>();
+      const translationUsedIndices = new Set<number>();
+
+      const englishItems: DisplayItem[] = question.words.map(
+        (word, displayIndex) => {
+          // Find the original index from pairs
+          const possibleIndices = englishMap.get(word) || [];
+          // Use the first available index (for duplicates, track usage across all items)
+          const originalIndex =
+            possibleIndices.find(idx => !englishUsedIndices.has(idx)) ||
+            possibleIndices[0] ||
+            displayIndex;
+          englishUsedIndices.add(originalIndex);
+          return { value: word, originalIndex };
+        },
+      );
+
+      const translationItems: DisplayItem[] = question.translations.map(
+        (translation, displayIndex) => {
+          const possibleIndices = translationMap.get(translation) || [];
+          const originalIndex =
+            possibleIndices.find(idx => !translationUsedIndices.has(idx)) ||
+            possibleIndices[0] ||
+            displayIndex;
+          translationUsedIndices.add(originalIndex);
+          return { value: translation, originalIndex };
+        },
+      );
+
+      display[index] = {
+        english: englishItems,
+        translations: translationItems,
       };
     });
-    setShuffledData(shuffled);
+    setDisplayData(display);
   }, [data]);
 
   const sensors = useSensors(
@@ -200,19 +235,19 @@ export const WordMatchingQuiz: React.FC<{ data: WordMatchingQuestion[] }> = ({
     // Only allow matching between different types (English <-> Translation) in the same question
     if (activeQIndex !== overQIndex || activeType === overType) return;
 
-    // Get original indices from shuffled data
-    const shuffled = shuffledData[activeQIndex];
-    if (!shuffled) return;
+    // Get original indices from display data
+    const display = displayData[activeQIndex];
+    if (!display) return;
 
     const activeOriginalIndex =
       activeType === 'english'
-        ? shuffled.english[activeDisplayIndex].originalIndex
-        : shuffled.translations[activeDisplayIndex].originalIndex;
+        ? display.english[activeDisplayIndex].originalIndex
+        : display.translations[activeDisplayIndex].originalIndex;
 
     const overOriginalIndex =
       overType === 'english'
-        ? shuffled.english[overDisplayIndex].originalIndex
-        : shuffled.translations[overDisplayIndex].originalIndex;
+        ? display.english[overDisplayIndex].originalIndex
+        : display.translations[overDisplayIndex].originalIndex;
 
     setMatches(prev => {
       const newMatches = { ...prev };
@@ -354,8 +389,8 @@ export const WordMatchingQuiz: React.FC<{ data: WordMatchingQuestion[] }> = ({
 
       <Stack spacing={4}>
         {data.map((question, qIndex) => {
-          const shuffled = shuffledData[qIndex];
-          if (!shuffled) return null;
+          const display = displayData[qIndex];
+          if (!display) return null;
 
           return (
             <Paper key={qIndex} elevation={2} sx={{ p: 3, borderRadius: 3 }}>
@@ -378,7 +413,7 @@ export const WordMatchingQuiz: React.FC<{ data: WordMatchingQuestion[] }> = ({
                       English
                     </Typography>
                     <Stack spacing={1.5}>
-                      {shuffled.english.map((item, displayIndex) => {
+                      {display.english.map((item, displayIndex) => {
                         const originalIndex = item.originalIndex;
                         const matched = isMatched(
                           qIndex,
@@ -420,7 +455,7 @@ export const WordMatchingQuiz: React.FC<{ data: WordMatchingQuestion[] }> = ({
                       Translation
                     </Typography>
                     <Stack spacing={1.5}>
-                      {shuffled.translations.map((item, displayIndex) => {
+                      {display.translations.map((item, displayIndex) => {
                         const originalIndex = item.originalIndex;
                         const matched = isMatched(
                           qIndex,
@@ -478,11 +513,11 @@ export const WordMatchingQuiz: React.FC<{ data: WordMatchingQuestion[] }> = ({
                           const qIdx = parseInt(match[1]);
                           const type = match[2];
                           const displayIdx = parseInt(match[3]);
-                          const shuffled = shuffledData[qIdx];
-                          if (!shuffled) return '';
+                          const display = displayData[qIdx];
+                          if (!display) return '';
                           return type === 'english'
-                            ? shuffled.english[displayIdx].value
-                            : shuffled.translations[displayIdx].value;
+                            ? display.english[displayIdx].value
+                            : display.translations[displayIdx].value;
                         })()}
                       </Typography>
                     </Box>
