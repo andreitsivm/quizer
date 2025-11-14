@@ -3,7 +3,7 @@ import React from 'react';
 
 import { SettingsFormFields } from '@quizer/config/quiz-settings';
 import { Controller, useFormContext } from 'react-hook-form';
-import { TextField } from '@radix-ui/themes';
+import { TextField, FormControl } from '@mui/material';
 
 const QuizTopic: React.FC = () => {
   const { control } = useFormContext();
@@ -13,7 +13,14 @@ const QuizTopic: React.FC = () => {
       name={SettingsFormFields.topic}
       control={control}
       render={({ field }) => (
-        <TextField.Root placeholder='Topic' {...field}></TextField.Root>
+        <FormControl fullWidth>
+          <TextField 
+            label="Topic (Optional)" 
+            placeholder="e.g., Business English, Travel, Technology"
+            helperText="Leave empty for general topics"
+            {...field}
+          />
+        </FormControl>
       )}
     />
   );

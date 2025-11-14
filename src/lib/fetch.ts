@@ -1,5 +1,5 @@
 import { ApiRoutes } from '@quizer/config/app';
-import { QuizSettingsFormState } from '@quizer/config/quiz-settings';
+import { QuizSettingsFormState, QuizTypes } from '@quizer/config/quiz-settings';
 
 const baseFetch = async (url: string, options?: RequestInit) => {
   try {
@@ -15,7 +15,25 @@ const baseFetch = async (url: string, options?: RequestInit) => {
 };
 
 export const generateQuiz = async (data: QuizSettingsFormState) => {
-  const res = await baseFetch(ApiRoutes.generateChoiceQuiz, {
+  let apiRoute: string;
+  
+  switch (data.quiz_type) {
+    case QuizTypes.multipleChoice:
+      apiRoute = ApiRoutes.generateMultipleChoiceQuiz;
+      break;
+    case QuizTypes.wordMatching:
+      apiRoute = ApiRoutes.generateWordMatchingQuiz;
+      break;
+    case QuizTypes.sentenceOrdering:
+      apiRoute = ApiRoutes.generateSentenceOrderingQuiz;
+      break;
+    case QuizTypes.singleChoice:
+    default:
+      apiRoute = ApiRoutes.generateChoiceQuiz;
+      break;
+  }
+
+  const res = await baseFetch(apiRoute, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

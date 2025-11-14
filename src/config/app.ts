@@ -8,4 +8,7 @@ export const Routes = {
 
 export const ApiRoutes = {
   generateChoiceQuiz: '/api/generate-choice-quiz/',
+  generateMultipleChoiceQuiz: '/api/generate-multiple-choice-quiz/',
+  generateWordMatchingQuiz: '/api/generate-word-matching-quiz/',
+  generateSentenceOrderingQuiz: '/api/generate-sentence-ordering-quiz/',
 } as const;

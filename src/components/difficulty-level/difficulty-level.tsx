@@ -6,7 +6,11 @@ import {
   SettingsFormFields,
 } from '@quizer/config/quiz-settings';
 import { Controller, useFormContext } from 'react-hook-form';
-import Select from '@quizer/ui/select';
+
+import TextField from '@mui/material/TextField';
+import FormControl from '@mui/material/FormControl';
+import FormHelperText from '@mui/material/FormHelperText';
+import { Autocomplete } from '@mui/material';
 
 const DifficultyLevel: React.FC = () => {
   const { control } = useFormContext();
@@ -19,16 +23,28 @@ const DifficultyLevel: React.FC = () => {
         required: 'Please, choose difficulty level',
       }}
       render={({ field, fieldState }) => (
-        <div>
-          <Select
-            selectTriggerProps={{
-              placeholder: 'Difficulty level',
-            }}
+        <FormControl fullWidth>
+          <Autocomplete
             options={levelsOptions}
-            {...field}
+            getOptionLabel={(option) => `${option.value} - ${option.label}`}
+            isOptionEqualToValue={(option, value) => option.value === value.value}
+            value={levelsOptions.find(opt => opt.value === field.value) || null}
+            onChange={(_, newValue) => {
+              field.onChange(newValue?.value || '');
+            }}
+            renderInput={params => (
+              <TextField 
+                {...params} 
+                label='Difficulty Level (CEFR)'
+                error={!!fieldState.error}
+              />
+            )}
           />
-          <p>{fieldState.error?.message}</p>
-        </div>
+
+          {fieldState.error && (
+            <FormHelperText error>{fieldState.error.message}</FormHelperText>
+          )}
+        </FormControl>
       )}
     />
   );
