@@ -1,14 +1,17 @@
-import { QuizSettingsFormState, QuizTypes } from '@quizer/config/quiz-settings';
+import { QuizSettingsFormState } from '@quizer/config/quiz-settings';
 import { generateQuiz } from '@quizer/lib/fetch';
-import { 
-  ChoiceTestQuestion, 
-  WordMatchingQuestion, 
-  SentenceOrderingQuestion 
+import {
+  ChoiceTestQuestion,
+  WordMatchingQuestion,
+  SentenceOrderingQuestion,
 } from '@quizer/types/quizes';
 import { create } from 'zustand';
 
 interface QuizResult {
-  quiz: ChoiceTestQuestion[] | WordMatchingQuestion[] | SentenceOrderingQuestion[];
+  quiz:
+    | ChoiceTestQuestion[]
+    | WordMatchingQuestion[]
+    | SentenceOrderingQuestion[];
   quizType?: string;
 }
 
@@ -31,15 +34,16 @@ export const useChoiceQuizStore = create<QuizStore>(set => ({
       // Ensure questions_qty is a number
       const formattedData = {
         ...data,
-        questions_qty: typeof data.questions_qty === 'string' 
-          ? parseInt(data.questions_qty, 10) 
-          : data.questions_qty,
+        questions_qty:
+          typeof data.questions_qty === 'string'
+            ? parseInt(data.questions_qty, 10)
+            : data.questions_qty,
       };
       const result = await generateQuiz(formattedData);
 
-      set({ 
-        result: { ...result, quizType: formattedData.quiz_type }, 
-        isLoading: false 
+      set({
+        result: { ...result, quizType: formattedData.quiz_type },
+        isLoading: false,
       });
     } catch (error) {
       console.error('Error generating quiz:', error);

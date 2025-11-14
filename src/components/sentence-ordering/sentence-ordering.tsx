@@ -27,8 +27,6 @@ import {
   Alert,
 } from '@mui/material';
 import { SentenceOrderingQuestion } from '@quizer/types/quizes';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
 
 interface SortableWordProps {
   id: string;
@@ -41,7 +39,6 @@ interface SortableWordProps {
 const SortableWord: React.FC<SortableWordProps> = ({
   id,
   word,
-  isDragging,
   isCorrect,
   isIncorrect,
 }) => {
@@ -91,7 +88,7 @@ const SortableWord: React.FC<SortableWordProps> = ({
         },
       }}
     >
-      <Typography variant="body1" fontWeight={600}>
+      <Typography variant='body1' fontWeight={600}>
         {word}
       </Typography>
     </Box>
@@ -110,7 +107,7 @@ export const SentenceOrderingQuiz: React.FC<{
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
   );
 
   // Initialize word orders with shuffled words
@@ -121,7 +118,9 @@ export const SentenceOrderingQuiz: React.FC<{
       // If shuffled is missing words or has wrong count, use shuffled as-is but log warning
       if (question.shuffled.length !== question.words.length) {
         console.warn(
-          `Question ${index + 1}: Shuffled array length (${question.shuffled.length}) doesn't match words array length (${question.words.length})`
+          `Question ${index + 1}: Shuffled array length (${
+            question.shuffled.length
+          }) doesn't match words array length (${question.words.length})`,
         );
       }
       initialOrders[index] = [...question.shuffled];
@@ -154,7 +153,7 @@ export const SentenceOrderingQuiz: React.FC<{
 
     if (qIndex !== parseInt(overMatch[1])) return;
 
-    setWordOrders((prev) => {
+    setWordOrders(prev => {
       const newOrders = { ...prev };
       const currentOrder = [...(newOrders[qIndex] || [])];
       newOrders[qIndex] = arrayMove(currentOrder, oldIndex, newIndex);
@@ -175,9 +174,9 @@ export const SentenceOrderingQuiz: React.FC<{
 
       // Compare arrays element by element (handles duplicates correctly)
       const isCorrect = userOrder.every(
-        (word, index) => word === correctOrder[index]
+        (word, index) => word === correctOrder[index],
       );
-      
+
       if (isCorrect) correct++;
     });
 
@@ -218,12 +217,17 @@ export const SentenceOrderingQuiz: React.FC<{
     <Box sx={{ py: 4 }}>
       <Paper elevation={2} sx={{ p: 4, borderRadius: 3, mb: 3 }}>
         <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
+          direction='row'
+          justifyContent='space-between'
+          alignItems='center'
           mb={2}
         >
-          <Typography variant="h4" component="h1" fontWeight="bold" color="primary">
+          <Typography
+            variant='h4'
+            component='h1'
+            fontWeight='bold'
+            color='primary'
+          >
             Sentence Ordering Quiz
           </Typography>
           {score && (
@@ -240,7 +244,7 @@ export const SentenceOrderingQuiz: React.FC<{
             />
           )}
         </Stack>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant='body1' color='text.secondary'>
           {data.length} {data.length === 1 ? 'sentence' : 'sentences'} • Drag
           words to arrange them in the correct order
         </Typography>
@@ -251,9 +255,10 @@ export const SentenceOrderingQuiz: React.FC<{
           const currentOrder = wordOrders[qIndex] || question.shuffled;
           const wordIds = currentOrder.map((_, i) => `q${qIndex}-word-${i}`);
           const sentenceCorrect = isSentenceCorrect(qIndex);
-          
+
           // Validate data integrity
-          const hasDataIssue = question.shuffled.length !== question.words.length;
+          const hasDataIssue =
+            question.shuffled.length !== question.words.length;
 
           return (
             <Paper
@@ -272,15 +277,20 @@ export const SentenceOrderingQuiz: React.FC<{
             >
               <Stack spacing={2}>
                 <Box>
-                  <Typography variant="h6" fontWeight="600" gutterBottom>
+                  <Typography variant='h6' fontWeight='600' gutterBottom>
                     Sentence {qIndex + 1}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  <Typography
+                    variant='body2'
+                    color='text.secondary'
+                    sx={{ mb: 2 }}
+                  >
                     Arrange the words to form a correct sentence:
                   </Typography>
                   {hasDataIssue && (
-                    <Alert severity="warning" sx={{ mb: 2 }}>
-                      Warning: The number of words doesn't match. Please ensure all words are included.
+                    <Alert severity='warning' sx={{ mb: 2 }}>
+                      Warning: The number of words doesn&apos;t match. Please
+                      ensure all words are included.
                     </Alert>
                   )}
                 </Box>
@@ -295,7 +305,12 @@ export const SentenceOrderingQuiz: React.FC<{
                     items={wordIds}
                     strategy={verticalListSortingStrategy}
                   >
-                    <Stack spacing={1.5} direction="row" flexWrap="wrap" gap={1}>
+                    <Stack
+                      spacing={1.5}
+                      direction='row'
+                      flexWrap='wrap'
+                      gap={1}
+                    >
                       {currentOrder.map((word, wordIndex) => {
                         const correct = isWordCorrect(qIndex, wordIndex);
                         const incorrect =
@@ -328,12 +343,10 @@ export const SentenceOrderingQuiz: React.FC<{
                           bgcolor: 'primary.light',
                         }}
                       >
-                        <Typography variant="body1" fontWeight={600}>
+                        <Typography variant='body1' fontWeight={600}>
                           {activeId.match(/^q\d+-word-(\d+)$/) &&
                             currentOrder[
-                              parseInt(
-                                activeId.match(/^q\d+-word-(\d+)$/)![1]
-                              )
+                              parseInt(activeId.match(/^q\d+-word-(\d+)$/)![1])
                             ]}
                         </Typography>
                       </Box>
@@ -343,11 +356,11 @@ export const SentenceOrderingQuiz: React.FC<{
 
                 {submitted && (
                   <Box>
-                    <Typography variant="body2" fontWeight="600" gutterBottom>
+                    <Typography variant='body2' fontWeight='600' gutterBottom>
                       Your sentence:
                     </Typography>
                     <Typography
-                      variant="body1"
+                      variant='body1'
                       sx={{
                         p: 2,
                         borderRadius: 2,
@@ -363,15 +376,15 @@ export const SentenceOrderingQuiz: React.FC<{
                       {currentOrder.join(' ')}
                     </Typography>
                     <Typography
-                      variant="body2"
-                      fontWeight="600"
+                      variant='body2'
+                      fontWeight='600'
                       gutterBottom
                       sx={{ mt: 2 }}
                     >
                       Correct sentence:
                     </Typography>
                     <Typography
-                      variant="body1"
+                      variant='body1'
                       sx={{
                         p: 2,
                         borderRadius: 2,
@@ -400,12 +413,12 @@ export const SentenceOrderingQuiz: React.FC<{
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             }}
           >
-            <Typography variant="h6" color="white" textAlign="center" mb={2}>
+            <Typography variant='h6' color='white' textAlign='center' mb={2}>
               Ready to submit your sentences?
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'center' }}>
               <Button
-                variant="contained"
+                variant='contained'
                 onClick={() => setSubmitted(true)}
                 sx={{
                   bgcolor: 'white',
@@ -435,14 +448,14 @@ export const SentenceOrderingQuiz: React.FC<{
                   : 'error.light',
             }}
           >
-            <Typography variant="h5" fontWeight="bold" gutterBottom>
+            <Typography variant='h5' fontWeight='bold' gutterBottom>
               {score && score.percentage >= 70
                 ? '🎉 Excellent Work!'
                 : score && score.percentage >= 50
                 ? '👍 Good Job!'
                 : '📚 Keep Practicing!'}
             </Typography>
-            <Typography variant="body1" sx={{ mt: 1 }}>
+            <Typography variant='body1' sx={{ mt: 1 }}>
               You correctly ordered {score?.correct} out of {score?.total}{' '}
               sentences.
             </Typography>
