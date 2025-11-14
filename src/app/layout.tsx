@@ -6,6 +6,7 @@ import RootProvider from '@quizer/providers/root-provider';
 import './globals.css';
 
 import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 import theme from '@quizer/ui/theme';
 
 const roboto = Roboto({
@@ -17,7 +18,8 @@ const roboto = Roboto({
 
 export const metadata: Metadata = {
   title: 'English Quiz Generator - AI-Powered Language Tests',
-  description: 'Create personalized English quizzes with AI-generated questions. Practice grammar, vocabulary, and more at any difficulty level.',
+  description:
+    'Create personalized English quizzes with AI-generated questions. Practice grammar, vocabulary, and more at any difficulty level.',
 };
 
 export default function RootLayout({
@@ -28,8 +30,9 @@ export default function RootLayout({
   return (
     <html lang='en' className={roboto.variable}>
       <body>
-        <AppRouterCacheProvider options={{ key: 'css' }}>
+        <AppRouterCacheProvider options={{ key: 'css', enableCssLayer: false }}>
           <ThemeProvider theme={theme}>
+            <CssBaseline />
             <RootProvider>
               <Header />
               <main>{children}</main>

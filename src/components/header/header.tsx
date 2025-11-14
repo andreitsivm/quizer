@@ -1,3 +1,4 @@
+'use client';
 import { Routes } from '@quizer/config/app';
 import Link from 'next/link';
 import React from 'react';
